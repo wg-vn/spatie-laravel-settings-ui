@@ -4,6 +4,8 @@
 >
 > A port of [`filament/spatie-laravel-settings-plugin`](https://github.com/filamentphp/spatie-laravel-settings-plugin) with no Filament, Livewire or build step. It **assumes you already use `spatie/laravel-settings`**. It edits your settings classes and does not replace them.
 
+![Settings UI Screenshot](spatie-laravel-settings-ui-screenshot.png)
+
 ---
 
 ## Features
