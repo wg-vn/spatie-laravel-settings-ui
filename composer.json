@@ -1,0 +1,45 @@
+{
+    "name": "wg-vn/spatie-laravel-settings-ui",
+    "description": "A plain Blade admin UI for Spatie's Laravel Settings. No Filament, no Livewire, no build step.",
+    "keywords": [
+        "spatie",
+        "laravel-settings",
+        "settings",
+        "laravel",
+        "laravel-package",
+        "ui",
+        "admin",
+        "blade"
+    ],
+    "homepage": "https://github.com/wg-vn/spatie-laravel-settings-ui",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Werner Garcia",
+            "email": "wgarcia@vestednetworks.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.4",
+        "illuminate/contracts": "^13.32.0",
+        "spatie/laravel-settings": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "WgVn\\SettingsUi\\": "src/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "WgVn\\SettingsUi\\SettingsUiServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

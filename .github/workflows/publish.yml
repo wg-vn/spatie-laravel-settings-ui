@@ -1,0 +1,63 @@
+name: Publish to Packagist
+
+# Publishes the package whenever a version tag (e.g. v3.0.1) is pushed.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write # create the GitHub Release
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+      - run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      - run: composer validate --strict --no-check-lock
+
+      # Packagist reads releases straight from the git repository rather than
+      # taking an upload, so "publishing" means asking it to re-fetch the repo.
+      # Requires PACKAGIST_USERNAME and PACKAGIST_TOKEN repo secrets, from
+      # https://packagist.org/profile/.
+      - name: Notify Packagist
+        env:
+          PACKAGIST_USERNAME: ${{ secrets.PACKAGIST_USERNAME }}
+          PACKAGIST_TOKEN: ${{ secrets.PACKAGIST_TOKEN }}
+        run: |
+          curl -sf -XPOST -H 'content-type:application/json' \
+            "https://packagist.org/api/update-package?username=${PACKAGIST_USERNAME}&apiToken=${PACKAGIST_TOKEN}" \
+            -d "{\"repository\":{\"url\":\"https://github.com/${GITHUB_REPOSITORY}\"}}"
+
+      # Publish a GitHub Release using the matching CHANGELOG.md section as the
+      # notes. Falls back to GitHub's auto-generated notes if no section exists.
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          # Extract the body under "## [VERSION]" up to the next "## [" heading
+          # (or the "[x]: url" link-reference footer at the end of the file).
+          awk -v ver="$VERSION" '
+            $0 ~ "^## \\[" ver "\\]" { flag = 1; next }
+            /^## \[/                 { flag = 0 }
+            /^\[[^]]+\]:/            { flag = 0 }
+            flag
+          ' CHANGELOG.md > RELEASE_NOTES.md
+          if [ -s RELEASE_NOTES.md ]; then
+            NOTES=(--notes-file RELEASE_NOTES.md)
+          else
+            echo "No CHANGELOG.md section for $VERSION; using auto-generated notes."
+            NOTES=(--generate-notes)
+          fi
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release edit "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" "${NOTES[@]}"
+          else
+            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" "${NOTES[@]}"
+          fi
