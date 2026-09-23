@@ -107,12 +107,15 @@ class ManageGeneral extends SettingsPage
             Field::textarea('footer_text')->rules(['max:500']),
             Field::password('api_key'),
             Field::json('social_links'),
+            Field::tags('alert_emails')->itemType('email'),
         ];
     }
 }
 ```
 
-The name of each field must match a property of the settings class. Available fields are `text`, `email`, `password`, `url`, `tel`, `number`, `textarea`, `toggle`, `select`, `date`, `datetime`, `color` and `json`. Each field takes `label()`, `help()`, `placeholder()`, `required()`, `disabled()` and `rules()`. `number` also takes `integer()`, `min()`, `max()` and `step()`. Enum options use a `getLabel()` method when the enum has one.
+The name of each field must match a property of the settings class. Available fields are `text`, `email`, `password`, `url`, `tel`, `number`, `textarea`, `toggle`, `select`, `date`, `datetime`, `color`, `json` and `tags`. Each field takes `label()`, `help()`, `placeholder()`, `required()`, `disabled()` and `rules()`. `number` also takes `integer()`, `min()`, `max()` and `step()`. Enum options use a `getLabel()` method when the enum has one. Email fields require a dotted domain, so `user@localhost` is rejected.
+
+`tags` edits an `array` property as a list of removable chips. Enter, a comma or leaving the input adds what was typed, and a pasted list becomes one chip per item. Duplicates and blanks are dropped on save. `itemType('email')` or `itemType('url')` validates each item, marking invalid ones as they are added and rejecting them on save. `required()` means at least one item.
 
 ### Authorization
 

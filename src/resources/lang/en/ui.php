@@ -14,6 +14,7 @@ return [
     'password_help' => 'Leave blank to keep the current value.',
     'errors' => 'Please correct the errors below.',
     'dismiss' => 'Dismiss',
+    'remove_item' => 'Remove :item',
     'empty' => [
         'title' => 'No settings to show',
         'body' => 'Create a settings class for spatie/laravel-settings and register it, or make sure you have access to one.',

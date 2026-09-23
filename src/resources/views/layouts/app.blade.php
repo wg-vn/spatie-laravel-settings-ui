@@ -142,6 +142,112 @@
             return;
         }
 
+        // Tags: typed text becomes a chip on Enter, comma or blur, and a pasted
+        // list splits into one chip per item. Email and URL items split on spaces too.
+        // Registered before the unsaved-changes tracking, whose submit handler must run last.
+        form.querySelectorAll('[data-tags]').forEach(function (box) {
+            var entry = box.querySelector('[data-tags-input]');
+            var template = box.querySelector('[data-tag-template]');
+
+            if (entry.matches(':disabled')) {
+                return;
+            }
+
+            // The chips post the values; the entry's own copy would add a blank item.
+            entry.removeAttribute('name');
+
+            var probe = document.createElement('input');
+            probe.type = entry.type;
+
+            // The browser accepts user@host; the server requires a dotted domain.
+            if (probe.type === 'email') {
+                probe.pattern = '[^@]+@[^@]+\\.[^@]+';
+            }
+
+            var separator = entry.type === 'text' ? /[,;]/ : /[\s,;]/;
+
+            var check = function (tag) {
+                probe.value = tag.querySelector('input').value;
+                tag.toggleAttribute('data-invalid', tag.hasAttribute('data-invalid') || !probe.checkValidity());
+            };
+
+            // Stored values predate these checks, so flag bad ones on load too.
+            box.querySelectorAll('[data-tag]').forEach(check);
+
+            var changed = function () {
+                box.dispatchEvent(new Event('input', { bubbles: true }));
+            };
+
+            var has = function (value) {
+                return Array.prototype.some.call(box.querySelectorAll('[data-tag] input'), function (input) {
+                    return input.value.toLowerCase() === value.toLowerCase();
+                });
+            };
+
+            var commit = function () {
+                var added = false;
+
+                entry.value.split(separator).forEach(function (value) {
+                    value = value.trim();
+
+                    if (value === '' || has(value)) {
+                        return;
+                    }
+
+                    var tag = template.content.firstElementChild.cloneNode(true);
+                    var remove = tag.querySelector('[data-tag-remove]');
+
+                    tag.querySelector('[data-tag-text]').textContent = value;
+                    tag.querySelector('input').value = value;
+                    remove.setAttribute('aria-label', remove.getAttribute('aria-label').replace(':item', value));
+                    check(tag);
+
+                    box.insertBefore(tag, entry);
+                    added = true;
+                });
+
+                entry.value = '';
+
+                if (added) {
+                    changed();
+                }
+            };
+
+            entry.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter' || event.key === ',') {
+                    event.preventDefault();
+                    commit();
+                } else if (event.key === 'Backspace' && entry.value === '') {
+                    var last = entry.previousElementSibling;
+
+                    if (last && last.matches('[data-tag]')) {
+                        last.remove();
+                        changed();
+                    }
+                }
+            });
+
+            entry.addEventListener('input', function () {
+                if (separator.test(entry.value)) {
+                    commit();
+                }
+            });
+
+            entry.addEventListener('blur', commit);
+            form.addEventListener('submit', commit);
+
+            box.addEventListener('click', function (event) {
+                var remove = event.target.closest('[data-tag-remove]');
+
+                if (remove) {
+                    remove.closest('[data-tag]').remove();
+                    changed();
+                }
+
+                entry.focus();
+            });
+        });
+
         // Warn before leaving with unsaved changes, as Filament does.
         var dirty = false;
         form.addEventListener('input', function () { dirty = true; });
@@ -160,6 +266,7 @@
                 form.requestSubmit();
             }
         });
+
     })();
 </script>
 

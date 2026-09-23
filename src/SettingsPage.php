@@ -182,9 +182,15 @@ class SettingsPage
             $this->callHook('beforeValidate');
 
             $request->validate(
-                collect($fields)->mapWithKeys(fn (Field $field) => [$field->getName() => $field->getRules()])->all(),
+                collect($fields)->flatMap(fn (Field $field) => array_filter([
+                    $field->getName() => $field->getRules(),
+                    "{$field->getName()}.*" => $field->getItemRules(),
+                ]))->all(),
                 [],
-                collect($fields)->mapWithKeys(fn (Field $field) => [$field->getName() => $field->getLabel()])->all(),
+                collect($fields)->flatMap(fn (Field $field) => [
+                    $field->getName() => $field->getLabel(),
+                    "{$field->getName()}.*" => $field->getLabel(),
+                ])->all(),
             );
 
             $this->callHook('afterValidate');

@@ -4,7 +4,7 @@
     $type = $field->getType();
     // Passwords are never sent back to the browser, not even from old input.
     $current = $type === 'password' ? null : old($name, $value);
-    $error = $errors->first($name);
+    $error = $errors->first($name) ?: ($type === 'tags' ? $errors->first("{$name}.*") : null);
     $help = $locked
         ? __('settings-ui::ui.locked_help')
         : ($field->getHelp() ?? ($type === 'password' ? __('settings-ui::ui.password_help') : null));
@@ -55,6 +55,30 @@
                     <option value="{{ $optionValue }}" @selected((string) $current === (string) $optionValue)>{{ $optionLabel }}</option>
                 @endforeach
             </select>
+        @elseif($type === 'tags')
+            {{-- Each chip posts a hidden name[] input. The entry input keeps the
+                 name too, so without the script it still adds one item per save. --}}
+            <div class="su-tags" data-tags>
+                @foreach(array_values((array) $current) as $index => $item)
+                    @include('settings-ui::fields.tag', [
+                        'item' => $item,
+                        'invalid' => $errors->has("{$name}.{$index}"),
+                        'disabled' => $field->isDisabled(),
+                    ])
+                @endforeach
+                <input type="{{ $field->getInputType() }}"
+                       id="{{ $id }}"
+                       name="{{ $name }}[]"
+                       class="su-tags__input"
+                       data-tags-input
+                       autocomplete="off"
+                       @if($field->getPlaceholder()) placeholder="{{ $field->getPlaceholder() }}" @endif
+                       @disabled($field->isDisabled())
+                       @if($describedBy) aria-describedby="{{ $describedBy }}" @endif>
+                <template data-tag-template>
+                    @include('settings-ui::fields.tag', ['item' => null, 'disabled' => false])
+                </template>
+            </div>
         @elseif($type === 'textarea' || $type === 'json')
             <textarea id="{{ $id }}"
                       name="{{ $name }}"

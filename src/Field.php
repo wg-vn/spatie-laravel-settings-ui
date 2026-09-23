@@ -17,6 +17,9 @@ use UnitEnum;
  */
 class Field
 {
+    /** `rfc` alone accepts dotless domains such as user@localhost. */
+    private const EMAIL_RULE = 'email:rfc,filter';
+
     protected ?string $label = null;
 
     protected ?string $help = null;
@@ -41,6 +44,8 @@ class Field
 
     /** @var array<string, string|int|float> */
     protected array $attributes = [];
+
+    protected string $itemType = 'text';
 
     final public function __construct(
         protected string $type,
@@ -121,6 +126,14 @@ class Field
     public static function json(string $name): static
     {
         return static::make('json', $name);
+    }
+
+    /**
+     * Edits a list of strings as removable chips.
+     */
+    public static function tags(string $name): static
+    {
+        return static::make('tags', $name);
     }
 
     public function label(string $label): static
@@ -207,6 +220,17 @@ class Field
         return $this;
     }
 
+    /**
+     * What each tag holds: 'text', 'email' or 'url'. Email and URL tags are
+     * checked in the browser as they are added, and validated on save.
+     */
+    public function itemType(string $type): static
+    {
+        $this->itemType = $type;
+
+        return $this;
+    }
+
     public function getName(): string
     {
         return $this->name;
@@ -252,7 +276,7 @@ class Field
 
     public function isFullWidth(): bool
     {
-        return in_array($this->type, ['textarea', 'json'], true);
+        return in_array($this->type, ['textarea', 'json', 'tags'], true);
     }
 
     /**
@@ -278,6 +302,7 @@ class Field
     {
         return match ($this->type) {
             'datetime' => 'datetime-local',
+            'tags' => $this->itemType,
             default => $this->type,
         };
     }
@@ -299,6 +324,10 @@ class Field
             return $value->format($this->type === 'date' ? 'Y-m-d' : 'Y-m-d\TH:i');
         }
 
+        if ($this->type === 'tags') {
+            return array_values((array) ($value ?? []));
+        }
+
         if ($this->type === 'json') {
             return $value === null ? null : json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         }
@@ -317,6 +346,7 @@ class Field
     {
         return match (true) {
             $this->type === 'toggle' => (bool) $input,
+            $this->type === 'tags' => array_values(array_unique(array_filter((array) $input, 'filled'))),
             $input === null || $input === '' => null,
             $this->type === 'json' => json_decode($input, true),
             default => $input,
@@ -336,12 +366,13 @@ class Field
         $presence = $this->required && $this->type !== 'password' ? 'required' : 'nullable';
 
         $rules = match ($this->type) {
-            'email' => ['string', 'email'],
+            'email' => ['string', self::EMAIL_RULE],
             'url' => ['string', 'url'],
             'number' => [$this->integer ? 'integer' : 'numeric'],
             'date', 'datetime' => ['date'],
             'color' => ['string', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'json' => ['json'],
+            'tags' => ['array'],
             'select' => [Rule::in(array_map('strval', array_keys($this->getOptions())))],
             default => ['string'],
         };
@@ -355,5 +386,23 @@ class Field
         }
 
         return [$presence, ...$rules, ...$this->rules];
+    }
+
+    /**
+     * Rules for each item of a tags field, validated as `name.*`.
+     *
+     * @return array<int, mixed>
+     */
+    public function getItemRules(): array
+    {
+        if ($this->type !== 'tags') {
+            return [];
+        }
+
+        return ['nullable', 'string', ...match ($this->itemType) {
+            'email' => [self::EMAIL_RULE],
+            'url' => ['url'],
+            default => [],
+        }];
     }
 }
