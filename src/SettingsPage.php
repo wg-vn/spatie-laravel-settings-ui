@@ -39,6 +39,11 @@ class SettingsPage
     private ?array $resolvedFields = null;
 
     /**
+     * @var array<int, Field|Section>|null
+     */
+    private ?array $layout = null;
+
+    /**
      * @var array<int, string>
      */
     private array $locked = [];
@@ -98,8 +103,9 @@ class SettingsPage
      * The form. Guessed from the settings class unless overridden.
      *
      * The name of each field must match a public property of the settings class.
+     * Wrap fields in a Section to show them under a heading.
      *
-     * @return array<int, Field>
+     * @return array<int, Field|Section>
      */
     public function fields(): array
     {
@@ -133,7 +139,53 @@ class SettingsPage
             }
 
             return $field;
-        }, $this->fields());
+        }, array_merge(...array_map(
+            fn (Field|Section $item) => $item instanceof Section ? $item->getFields() : [$item],
+            $this->getLayout(),
+        )));
+    }
+
+    /**
+     * The form as the page shows it: consecutive fields outside a section are
+     * grouped into an untitled one.
+     *
+     * @return array<int, Section>
+     */
+    public function getSections(): array
+    {
+        $this->getFields();
+
+        $sections = [];
+        $loose = [];
+
+        foreach ($this->getLayout() as $item) {
+            if ($item instanceof Field) {
+                $loose[] = $item;
+
+                continue;
+            }
+
+            if ($loose !== []) {
+                $sections[] = Section::make(null, $loose);
+                $loose = [];
+            }
+
+            $sections[] = $item;
+        }
+
+        if ($loose !== []) {
+            $sections[] = Section::make(null, $loose);
+        }
+
+        return $sections;
+    }
+
+    /**
+     * @return array<int, Field|Section>
+     */
+    private function getLayout(): array
+    {
+        return $this->layout ??= $this->fields();
     }
 
     public function isLocked(Field $field): bool

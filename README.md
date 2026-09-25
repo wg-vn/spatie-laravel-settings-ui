@@ -115,6 +115,20 @@ class ManageGeneral extends SettingsPage
 
 The name of each field must match a property of the settings class. Available fields are `text`, `email`, `password`, `url`, `tel`, `number`, `textarea`, `toggle`, `select`, `date`, `datetime`, `color`, `json` and `tags`. Each field takes `label()`, `help()`, `placeholder()`, `required()`, `disabled()` and `rules()`. `number` also takes `integer()`, `min()`, `max()` and `step()`. Enum options use a `getLabel()` method when the enum has one. Email fields require a dotted domain, so `user@localhost` is rejected.
 
+Fields render in a two-column grid, filled row by row. `textarea`, `json` and `tags` span both columns. To show related fields under a heading, wrap them in a section. Each section starts a new grid, and fields outside any section keep the plain layout:
+
+```php
+use WgVn\SettingsUi\Section;
+
+return [
+    Field::text('site_name'),
+    Section::make('Uploads', [
+        Field::number('max_uploads')->integer()->min(1),
+        Field::toggle('allow_svg'),
+    ])->description('Applies to every uploaded file.'),
+];
+```
+
 `tags` edits an `array` property as a list of removable chips. Enter, a comma or leaving the input adds what was typed, and a pasted list becomes one chip per item. Duplicates and blanks are dropped on save. `itemType('email')` or `itemType('url')` validates each item, marking invalid ones as they are added and rejecting them on save. `required()` means at least one item.
 
 ### Authorization

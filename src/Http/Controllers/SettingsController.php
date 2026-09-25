@@ -35,7 +35,7 @@ class SettingsController extends Controller
 
         return view('settings-ui::pages.edit', [
             'page' => $page,
-            'fields' => $page->getFields(),
+            'sections' => $page->getSections(),
             'data' => $page->getFormData(),
             'canEdit' => $page->canEdit(),
             'navigation' => $this->pages->accessible(),

@@ -29,13 +29,28 @@
 
             {{-- A disabled fieldset disables every control in it, as Filament's
                  disabled form does when canEdit() is false. --}}
-            <fieldset class="su-form-grid" @disabled(! $canEdit)>
-                @foreach($fields as $field)
-                    @include('settings-ui::fields.field', [
-                        'field' => $field,
-                        'value' => $data[$field->getName()] ?? null,
-                        'locked' => $page->isLocked($field),
-                    ])
+            <fieldset class="su-sections" @disabled(! $canEdit)>
+                @foreach($sections as $section)
+                    <section class="su-section">
+                        @if($section->getHeading())
+                            <div class="su-section__header">
+                                <h2 class="su-section__title">{{ $section->getHeading() }}</h2>
+                                @if($section->getDescription())
+                                    <p class="su-help">{{ $section->getDescription() }}</p>
+                                @endif
+                            </div>
+                        @endif
+
+                        <div class="su-form-grid">
+                            @foreach($section->getFields() as $field)
+                                @include('settings-ui::fields.field', [
+                                    'field' => $field,
+                                    'value' => $data[$field->getName()] ?? null,
+                                    'locked' => $page->isLocked($field),
+                                ])
+                            @endforeach
+                        </div>
+                    </section>
                 @endforeach
             </fieldset>
         </div>
