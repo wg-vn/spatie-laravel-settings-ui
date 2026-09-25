@@ -15,6 +15,7 @@ return [
     'errors' => 'Please correct the errors below.',
     'dismiss' => 'Dismiss',
     'remove_item' => 'Remove :item',
+    'show_password' => 'Show password',
     'empty' => [
         'title' => 'No settings to show',
         'body' => 'Create a settings class for spatie/laravel-settings and register it, or make sure you have access to one.',

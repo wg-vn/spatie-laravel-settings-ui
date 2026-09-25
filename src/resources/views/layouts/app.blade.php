@@ -248,6 +248,28 @@
             });
         });
 
+        // Password reveal. The label stays "Show password" and aria-pressed
+        // carries the state, so only one string needs translating.
+        form.querySelectorAll('[data-password]').forEach(function (box) {
+            var input = box.querySelector('input');
+            var toggle = box.querySelector('[data-password-toggle]');
+
+            toggle.hidden = false;
+
+            toggle.addEventListener('click', function () {
+                var shown = input.type === 'password';
+                input.type = shown ? 'text' : 'password';
+                toggle.setAttribute('aria-pressed', shown ? 'true' : 'false');
+            });
+
+            // Masked again before submit, so the browser does not keep the
+            // value in its autofill history for text inputs.
+            form.addEventListener('submit', function () {
+                input.type = 'password';
+                toggle.setAttribute('aria-pressed', 'false');
+            });
+        });
+
         // Warn before leaving with unsaved changes, as Filament does.
         var dirty = false;
         form.addEventListener('input', function () { dirty = true; });

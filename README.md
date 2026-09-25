@@ -65,7 +65,7 @@ A page with no custom fields guesses its form from the public properties of the 
 
 A property that is not nullable is required. Submitted values are converted back to the declared type (int, float, bool, enum, `DateTime` class, or a `spatie/laravel-data` object) before saving.
 
-Password fields never show the stored value. Leaving one blank keeps it.
+Password fields never show the stored value. Leaving one blank keeps it. The eye button in the field shows or hides what you type.
 
 ---
 
