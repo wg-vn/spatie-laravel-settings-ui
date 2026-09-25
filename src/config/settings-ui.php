@@ -100,6 +100,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Sensitive Fields
+    |--------------------------------------------------------------------------
+    |
+    | The field generated pages use for encrypted properties and properties
+    | named like a password. 'password' never shows the stored value, and
+    | leaving it blank keeps it. 'secret' shows the stored value masked, with a
+    | button to reveal it.
+    |
+    */
+
+    'sensitive_field' => 'password',
+
+    /*
+    |--------------------------------------------------------------------------
     | UI Configuration
     |--------------------------------------------------------------------------
     */

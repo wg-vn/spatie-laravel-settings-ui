@@ -89,16 +89,19 @@
                       @required($field->isRequired())
                       @disabled($field->isDisabled())
                       @if($describedBy) aria-describedby="{{ $describedBy }}" @endif>{{ $current }}</textarea>
-        @elseif($type === 'password')
-            {{-- The reveal button only shows once the script can make it work. --}}
+        @elseif($type === 'password' || $type === 'secret')
+            {{-- The reveal button only shows once the script can make it work. A secret
+                 field carries its stored value; a password field never does. --}}
             <div class="su-password" data-password>
                 <input type="password"
                        id="{{ $id }}"
                        name="{{ $name }}"
                        class="su-input"
                        autocomplete="new-password"
+                       @if($type === 'secret') value="{{ $current }}" @endif
                        @if($field->getPlaceholder()) placeholder="{{ $field->getPlaceholder() }}" @endif
                        @foreach($field->getAttributes() as $attribute => $attributeValue) {{ $attribute }}="{{ $attributeValue }}" @endforeach
+                       @required($type === 'secret' && $field->isRequired())
                        @disabled($field->isDisabled())
                        @if($describedBy) aria-describedby="{{ $describedBy }}" @endif>
                 <button type="button"

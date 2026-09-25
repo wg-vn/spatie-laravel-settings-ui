@@ -75,6 +75,15 @@ class Field
         return static::make('password', $name);
     }
 
+    /**
+     * Shows the stored value masked, with a button to reveal it. Unlike a password
+     * field, leaving it blank clears the value.
+     */
+    public static function secret(string $name): static
+    {
+        return static::make('secret', $name);
+    }
+
     public static function url(string $name): static
     {
         return static::make('url', $name);
@@ -302,6 +311,7 @@ class Field
     {
         return match ($this->type) {
             'datetime' => 'datetime-local',
+            'secret' => 'password',
             'tags' => $this->itemType,
             default => $this->type,
         };

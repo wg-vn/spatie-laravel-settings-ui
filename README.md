@@ -13,7 +13,7 @@
 * A page for every settings class, at `/settings-ui`, with no configuration
 * Forms guessed from property types: strings, booleans, numbers, enums, dates, arrays
 * Custom pages with your own fields, access rules and save hooks
-* Encrypted and password properties are never sent to the browser
+* Encrypted and password properties are never sent to the browser, unless you choose secret fields for them
 * Locked properties shown read-only, since Spatie skips them on save
 * Authentication, a gate and user/role allow-lists, on by default, and closed outside `local` until you choose who gets in
 * Light and dark themes, one stylesheet served by the package
@@ -59,13 +59,15 @@ A page with no custom fields guesses its form from the public properties of the 
 | enum | select, with one option per case |
 | `DateTimeInterface` (and Carbon) | date and time |
 | `array` | JSON editor |
-| encrypted, or a name containing `password` | password |
+| encrypted, or a name containing `password` | password, or secret with `'sensitive_field' => 'secret'` |
 | name containing `email` / `phone`, `tel` / `url` | email / tel / url |
 | anything else | text |
 
 A property that is not nullable is required. Submitted values are converted back to the declared type (int, float, bool, enum, `DateTime` class, or a `spatie/laravel-data` object) before saving.
 
 Password fields never show the stored value. Leaving one blank keeps it. The eye button in the field shows or hides what you type.
+
+Secret fields (`Field::secret()`) are for values an administrator needs to read back, such as API keys. They show the stored value masked, and the eye button reveals it. Leaving one blank clears the value. The value is in the page's HTML, so anyone who can open the page can read it; settings pages are sent with `Cache-Control: no-store`.
 
 ---
 
@@ -113,7 +115,7 @@ class ManageGeneral extends SettingsPage
 }
 ```
 
-The name of each field must match a property of the settings class. Available fields are `text`, `email`, `password`, `url`, `tel`, `number`, `textarea`, `toggle`, `select`, `date`, `datetime`, `color`, `json` and `tags`. Each field takes `label()`, `help()`, `placeholder()`, `required()`, `disabled()` and `rules()`. `number` also takes `integer()`, `min()`, `max()` and `step()`. Enum options use a `getLabel()` method when the enum has one. Email fields require a dotted domain, so `user@localhost` is rejected.
+The name of each field must match a property of the settings class. Available fields are `text`, `email`, `password`, `secret`, `url`, `tel`, `number`, `textarea`, `toggle`, `select`, `date`, `datetime`, `color`, `json` and `tags`. Each field takes `label()`, `help()`, `placeholder()`, `required()`, `disabled()` and `rules()`. `number` also takes `integer()`, `min()`, `max()` and `step()`. Enum options use a `getLabel()` method when the enum has one. Email fields require a dotted domain, so `user@localhost` is rejected.
 
 Fields render in a two-column grid, filled row by row. `textarea`, `json` and `tags` span both columns. To show related fields under a heading, wrap them in a section. Each section starts a new grid, and fields outside any section keep the plain layout:
 

@@ -4,6 +4,7 @@ namespace WgVn\SettingsUi\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 use WgVn\SettingsUi\SettingsPage;
@@ -29,17 +30,20 @@ class SettingsController extends Controller
         ]);
     }
 
-    public function show(string $page): View
+    /**
+     * Not stored by the browser, since secret fields put stored values in the page.
+     */
+    public function show(string $page): Response
     {
         $page = $this->page($page);
 
-        return view('settings-ui::pages.edit', [
+        return response()->view('settings-ui::pages.edit', [
             'page' => $page,
             'sections' => $page->getSections(),
             'data' => $page->getFormData(),
             'canEdit' => $page->canEdit(),
             'navigation' => $this->pages->accessible(),
-        ]);
+        ])->header('Cache-Control', 'no-store, private');
     }
 
     public function update(Request $request, string $page): RedirectResponse

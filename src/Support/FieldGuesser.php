@@ -46,7 +46,7 @@ class FieldGuesser
                 $typeName === 'int', $typeName === 'float' => 'number',
                 in_array($name, $encrypted, true)
                     || $property->getAttributes(ShouldBeEncrypted::class)
-                    || str_contains($name, 'password') => 'password',
+                    || str_contains($name, 'password') => config('settings-ui.sensitive_field', 'password'),
                 str_contains($name, 'email') => 'email',
                 str_contains($name, 'phone') || str_contains($name, 'tel') => 'tel',
                 str_contains($name, 'url') => 'url',
