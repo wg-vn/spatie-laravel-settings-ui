@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-11-09
+
+### Added
+- `Field::secretJson()`: a secret that holds JSON, such as a service account key. It shows the stored value masked on one line; the show/hide button swaps it for a box with the JSON formatted over several lines, and back. Leaving it blank clears the value, and the value must be valid JSON.
+
 ## [1.4.0] - 2026-09-25
 
 ### Added

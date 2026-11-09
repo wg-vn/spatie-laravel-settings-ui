@@ -270,6 +270,38 @@
             });
         });
 
+        // JSON secret reveal: swaps the masked one-line input for the formatted box.
+        // Each swap carries the value across; text that is not JSON moves as typed.
+        form.querySelectorAll('[data-secret-json]').forEach(function (box) {
+            var input = box.querySelector('input');
+            var text = box.querySelector('textarea');
+            var toggle = box.querySelector('[data-password-toggle]');
+            var label = form.querySelector('label[for="' + input.id + '"]');
+            var labelFor = input.id;
+
+            function reformat(value, indent) {
+                try { return JSON.stringify(JSON.parse(value), null, indent); } catch (error) { return value; }
+            }
+
+            toggle.hidden = false;
+
+            toggle.addEventListener('click', function () {
+                var reveal = text.hidden;
+
+                if (reveal) {
+                    text.value = reformat(input.value, 4);
+                } else {
+                    input.value = reformat(text.value).replace(/\s*[\r\n]+\s*/g, ' ');
+                }
+
+                text.hidden = text.disabled = !reveal;
+                input.hidden = input.disabled = reveal;
+                if (label) { label.htmlFor = reveal ? text.id : labelFor; }
+                toggle.setAttribute('aria-pressed', reveal ? 'true' : 'false');
+                (reveal ? text : input).focus();
+            });
+        });
+
         // Warn before leaving with unsaved changes, as Filament does.
         var dirty = false;
         form.addEventListener('input', function () { dirty = true; });

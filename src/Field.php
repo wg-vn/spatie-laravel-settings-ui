@@ -84,6 +84,15 @@ class Field
         return static::make('secret', $name);
     }
 
+    /**
+     * A secret holding JSON, such as a service account key: masked on one line, and the
+     * reveal button shows it formatted over several lines. Leaving it blank clears it.
+     */
+    public static function secretJson(string $name): static
+    {
+        return static::make('secret-json', $name);
+    }
+
     public static function url(string $name): static
     {
         return static::make('url', $name);
@@ -285,7 +294,7 @@ class Field
 
     public function isFullWidth(): bool
     {
-        return in_array($this->type, ['textarea', 'json', 'tags'], true);
+        return in_array($this->type, ['textarea', 'json', 'secret-json', 'tags'], true);
     }
 
     /**
@@ -338,6 +347,10 @@ class Field
             return array_values((array) ($value ?? []));
         }
 
+        if ($this->type === 'secret-json' && is_array($value)) {
+            return json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        }
+
         if ($this->type === 'json') {
             return $value === null ? null : json_encode($value, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         }
@@ -381,7 +394,7 @@ class Field
             'number' => [$this->integer ? 'integer' : 'numeric'],
             'date', 'datetime' => ['date'],
             'color' => ['string', 'regex:/^#[0-9a-fA-F]{6}$/'],
-            'json' => ['json'],
+            'json', 'secret-json' => ['json'],
             'tags' => ['array'],
             'select' => [Rule::in(array_map('strval', array_keys($this->getOptions())))],
             default => ['string'],

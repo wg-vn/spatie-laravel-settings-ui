@@ -493,6 +493,10 @@ textarea.su-input { resize: vertical; min-height: 5rem; line-height: 1.5; }
 .su-password__toggle[aria-pressed="true"] .su-icon-eye { display: none; }
 .su-password__toggle[aria-pressed="true"] .su-icon-eye-off { display: block; }
 
+/* JSON secret: the revealed box keeps the button at its top-right corner. */
+.su-secret-json textarea:not([hidden]) ~ .su-password__toggle { top: 0.3125rem; transform: none; }
+.su-secret-json .su-input[hidden] { display: none; }
+
 /* Tags: chips and an entry input inside a box drawn like an input. */
 .su-tags {
     display: flex;

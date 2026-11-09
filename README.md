@@ -69,6 +69,8 @@ Password fields never show the stored value. Leaving one blank keeps it. The eye
 
 Secret fields (`Field::secret()`) are for values an administrator needs to read back, such as API keys. They show the stored value masked, and the eye button reveals it. Leaving one blank clears the value. The value is in the page's HTML, so anyone who can open the page can read it; settings pages are sent with `Cache-Control: no-store`.
 
+JSON secret fields (`Field::secretJson()`) work the same way for a secret that is a JSON document, such as a Google service account key. The masked value sits on one line; the eye button swaps it for a box with the JSON formatted over several lines, and back. The value must be valid JSON. They span both columns.
+
 ---
 
 ## Custom pages
@@ -115,9 +117,9 @@ class ManageGeneral extends SettingsPage
 }
 ```
 
-The name of each field must match a property of the settings class. Available fields are `text`, `email`, `password`, `secret`, `url`, `tel`, `number`, `textarea`, `toggle`, `select`, `date`, `datetime`, `color`, `json` and `tags`. Each field takes `label()`, `help()`, `placeholder()`, `required()`, `disabled()` and `rules()`. `number` also takes `integer()`, `min()`, `max()` and `step()`. Enum options use a `getLabel()` method when the enum has one. Email fields require a dotted domain, so `user@localhost` is rejected.
+The name of each field must match a property of the settings class. Available fields are `text`, `email`, `password`, `secret`, `secretJson`, `url`, `tel`, `number`, `textarea`, `toggle`, `select`, `date`, `datetime`, `color`, `json` and `tags`. Each field takes `label()`, `help()`, `placeholder()`, `required()`, `disabled()` and `rules()`. `number` also takes `integer()`, `min()`, `max()` and `step()`. Enum options use a `getLabel()` method when the enum has one. Email fields require a dotted domain, so `user@localhost` is rejected.
 
-Fields render in a two-column grid, filled row by row. `textarea`, `json` and `tags` span both columns. To show related fields under a heading, wrap them in a section. Each section starts a new grid, and fields outside any section keep the plain layout:
+Fields render in a two-column grid, filled row by row. `textarea`, `json`, `secretJson` and `tags` span both columns. To show related fields under a heading, wrap them in a section. Each section starts a new grid, and fields outside any section keep the plain layout:
 
 ```php
 use WgVn\SettingsUi\Section;

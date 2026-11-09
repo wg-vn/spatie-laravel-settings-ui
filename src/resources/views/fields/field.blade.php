@@ -89,6 +89,54 @@
                       @required($field->isRequired())
                       @disabled($field->isDisabled())
                       @if($describedBy) aria-describedby="{{ $describedBy }}" @endif>{{ $current }}</textarea>
+        @elseif($type === 'secret-json')
+            @php
+                // Compact for the one-line masked input, indented for the revealed box.
+                $decoded = is_string($current) ? json_decode($current, true) : null;
+                $flags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
+                $oneLine = is_array($decoded) ? json_encode($decoded, $flags) : $current;
+                $formatted = is_array($decoded) ? json_encode($decoded, $flags | JSON_PRETTY_PRINT) : $current;
+            @endphp
+            {{-- Only the visible control is enabled, so only it is submitted. Without the
+                 script the masked input works alone, as a secret field does. --}}
+            <div class="su-password su-secret-json" data-secret-json>
+                <input type="password"
+                       id="{{ $id }}"
+                       name="{{ $name }}"
+                       class="su-input"
+                       autocomplete="new-password"
+                       value="{{ $oneLine }}"
+                       @if($field->getPlaceholder()) placeholder="{{ $field->getPlaceholder() }}" @endif
+                       @required($field->isRequired())
+                       @disabled($field->isDisabled())
+                       @if($describedBy) aria-describedby="{{ $describedBy }}" @endif>
+                <textarea id="{{ $id }}-text"
+                          name="{{ $name }}"
+                          class="su-input su-mono"
+                          rows="10"
+                          spellcheck="false"
+                          autocomplete="off"
+                          hidden
+                          disabled
+                          @if($describedBy) aria-describedby="{{ $describedBy }}" @endif>{{ $formatted }}</textarea>
+                <button type="button"
+                        class="su-password__toggle"
+                        data-password-toggle
+                        aria-controls="{{ $id }} {{ $id }}-text"
+                        aria-pressed="false"
+                        aria-label="{{ __('settings-ui::ui.show_password') }}"
+                        title="{{ __('settings-ui::ui.show_password') }}"
+                        hidden
+                        @disabled($field->isDisabled())>
+                    <svg class="su-icon-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <svg class="su-icon-eye-off" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-2.2 3.2M6.6 6.6C3.7 8.4 2 12 2 12s3.5 7 10 7c1.9 0 3.6-.6 5-1.5M9.9 9.9a3 3 0 0 0 4.2 4.2M2 2l20 20"/>
+                    </svg>
+                </button>
+            </div>
         @elseif($type === 'password' || $type === 'secret')
             {{-- The reveal button only shows once the script can make it work. A secret
                  field carries its stored value; a password field never does. --}}
