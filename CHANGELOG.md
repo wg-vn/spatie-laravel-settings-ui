@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1] - 2026-11-20
+
+### Fixed
+- Opening a settings page through a host's Inertia login (`redirect()->intended()` after an Inertia form) showed it inside Inertia's dialog, where saving did nothing. Settings pages now answer an Inertia request with `409 X-Inertia-Location`, so Inertia loads them as a full page.
+
 ## [1.5.0] - 2026-11-09
 
 ### Added

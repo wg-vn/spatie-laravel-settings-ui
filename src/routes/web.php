@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use WgVn\SettingsUi\Http\Controllers\AssetController;
 use WgVn\SettingsUi\Http\Controllers\SettingsController;
+use WgVn\SettingsUi\Http\Middleware\LeaveInertiaVisit;
 use WgVn\SettingsUi\Support\RouteMiddleware;
 
 $config = config('settings-ui.route', []);
@@ -24,6 +25,10 @@ if (
 ) {
     $middleware = RouteMiddleware::protect($middleware);
 }
+
+// First, so an Inertia host's login redirecting here loads the page in full
+// rather than in Inertia's dialog.
+array_unshift($middleware, LeaveInertiaVisit::class);
 
 // Outside the protected group on purpose: a guest is redirected to the host's
 // login page, and a stylesheet behind auth would leave that page unstyled. The
